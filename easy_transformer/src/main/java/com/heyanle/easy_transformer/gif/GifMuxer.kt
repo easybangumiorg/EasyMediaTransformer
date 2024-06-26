@@ -88,6 +88,7 @@ class GifMuxer(
         }
         animatedGifEncoder.finish()
         outputStream.close()
+        bmp?.recycle()
 
     }
 }

@@ -17,7 +17,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs = listOf("-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn")
+        // freeCompilerArgs = listOf("-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn")
     }
 }
 
@@ -25,6 +25,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     kotlinOptions.jvmTarget = "11"
     kotlinOptions.freeCompilerArgs += "-Xcontext-receivers"
 }
+gradle.projectsEvaluated {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions.freeCompilerArgs += "-opt-in=androidx.media3.common.util.UnstableApi"
+    }
+}
+
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.21")
@@ -38,4 +44,6 @@ dependencies {
     api("androidx.media3:media3-common:$media3")
     api("androidx.media3:media3-effect:$media3")
     api("androidx.media3:media3-muxer:$media3")
+
+    implementation("androidx.annotation:annotation:1.8.0")
 }

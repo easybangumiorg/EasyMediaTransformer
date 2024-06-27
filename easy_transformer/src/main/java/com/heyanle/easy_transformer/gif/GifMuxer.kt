@@ -72,7 +72,7 @@ class GifMuxer(
             animatedGifEncoder.addFrame(bmp)
             val o = File(testFile, "${bufferInfo.presentationTimeUs} ${diff}.jpg")
             o.createNewFile()
-            bmp?.compress(Bitmap.CompressFormat.JPEG, 10, o.outputStream())
+            bmp?.compress(Bitmap.CompressFormat.JPEG, 100, o.outputStream())
             lastGifAppendTimeUs = bufferInfo.presentationTimeUs
         }
 

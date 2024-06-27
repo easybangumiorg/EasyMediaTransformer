@@ -23,6 +23,7 @@ class GifTransformer {
                     GifMuxer.Factory()
                 )
                 .setVideoMimeType(MimeTypes.VIDEO_H264)
+                .setRemoveAudio(true)
                 .build()
         }
     }

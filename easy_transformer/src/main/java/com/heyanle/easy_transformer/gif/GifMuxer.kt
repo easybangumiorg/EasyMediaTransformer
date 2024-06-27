@@ -30,14 +30,17 @@ class GifMuxer(
 
         override fun getSupportedSampleMimeTypes(trackType: Int): ImmutableList<String> {
             return if (trackType == C.TRACK_TYPE_VIDEO) {
-                ImmutableList.of(MimeTypes.VIDEO_H264)
+                ImmutableList.of(MimeTypes.VIDEO_H264, MimeTypes.VIDEO_H265, MimeTypes.VIDEO_AV1)
             } else {
-                ImmutableList.of()
+                ImmutableList.of(MimeTypes.AUDIO_AAC)
             }
         }
     }
 
     private val file = File(path)
+    private val testFile = File(path + ".test").apply {
+        this.mkdirs()
+    }
     private val outputStream = BufferedOutputStream(file.outputStream())
     private val animatedGifEncoder = AnimatedGifEncoder().apply {
         start(outputStream)
@@ -52,7 +55,9 @@ class GifMuxer(
         return object : Muxer.TrackToken { }
     }
 
-    override fun addMetadataEntry(metadataEntry: Metadata.Entry) { }
+    override fun addMetadataEntry(metadataEntry: Metadata.Entry) {
+
+    }
 
     override fun writeSampleData(
         trackToken: Muxer.TrackToken,
@@ -65,6 +70,9 @@ class GifMuxer(
             val diff = bufferInfo.presentationTimeUs - presentationTimeUs
             animatedGifEncoder.setDelay((diff / 1000).toInt())
             animatedGifEncoder.addFrame(bmp)
+            val o = File(testFile, "${bufferInfo.presentationTimeUs} ${diff}.jpg")
+            o.createNewFile()
+            bmp?.compress(Bitmap.CompressFormat.JPEG, 10, o.outputStream())
             lastGifAppendTimeUs = bufferInfo.presentationTimeUs
         }
 

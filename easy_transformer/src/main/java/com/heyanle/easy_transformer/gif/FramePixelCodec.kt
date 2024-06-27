@@ -45,7 +45,7 @@ class FramePixelCodec(
     private val byteBuffer: ByteBuffer = ByteBuffer.allocateDirect(bufferSize).order(ByteOrder.LITTLE_ENDIAN)
     private val easyEGLSurface = EasyEGLSurface.newInstance(this)
     private val surfaceTexturePixelCopy =
-        SurfaceTexturePixelCopy(easyEGLSurface.getTextureId()).apply {
+        SurfaceTexturePixelCopy(easyEGLSurface).apply {
             width = configFormat.width
             height = configFormat.height
         }

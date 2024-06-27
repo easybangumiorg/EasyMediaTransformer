@@ -59,7 +59,10 @@ class EasyEGLSurface(
 
         val lock = Object()
         private lateinit var handler: Handler
+
+        @Volatile
         private lateinit var easyEglSurfaceTexture: EasyEGLSurfaceTexture
+
         private var surface: EasyEGLSurface? = null
         private var initException: RuntimeException? = null
         private var initError: Error? = null

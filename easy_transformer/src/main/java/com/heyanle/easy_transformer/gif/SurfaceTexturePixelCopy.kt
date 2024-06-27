@@ -1,19 +1,17 @@
 package com.heyanle.easy_transformer.gif
 
-import android.graphics.SurfaceTexture
 import android.opengl.GLES20
 import android.util.Log
 import androidx.media3.common.util.UnstableApi
-import com.heyanle.easy_transformer.utils.EasyEGLSurfaceTexture
+import com.heyanle.easy_transformer.utils.EasyEGLSurface
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 /**
  * Created by heyanlin on 2024/6/26.
  */
 @UnstableApi
 class SurfaceTexturePixelCopy(
-    private val textureId: Int,
+    private val easyEGLSurface: EasyEGLSurface,
 ) {
 
     companion object {
@@ -33,11 +31,12 @@ class SurfaceTexturePixelCopy(
             Log.i(TAG, "create fbo $fboId")
         }
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboId)
+        Log.i(TAG, "textureId ${easyEGLSurface.getTextureId()}")
         GLES20.glFramebufferTexture2D(
             GLES20.GL_FRAMEBUFFER,
             GLES20.GL_COLOR_ATTACHMENT0,
             GLES20.GL_TEXTURE_2D,
-            textureId,
+            easyEGLSurface.getTextureId(),
             0
         )
         val fboStatus = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER)

@@ -1,30 +1,27 @@
 package com.heyanle.easy_transformer.gif
 
-import androidx.media3.common.C
-import androidx.media3.common.MimeTypes
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.transformer.Transformer
+import android.graphics.Rect
+import android.graphics.RectF
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.source.MediaSource
 
 /**
- * Created by heyanlin on 2024/6/26.
+ * Created by heyanle on 2024/6/28.
+ * https://github.com/heyanLE
  */
-@UnstableApi
-class GifTransformer {
-    companion object {
+class GifTransformer(
+    private val videoRectF: RectF,
+    private val cropRectF: RectF,
 
-        // 视频转 Gif
-        // 1. 设置编码器为 FramePixelCodec
-        // 2. 设置复用器为 GifMuxer
-        fun build(transformer: Transformer): Transformer {
-            return transformer
-                .buildUpon()
-                .setEncoderFactory(FramePixelCodec.Factory())
-                .setMuxerFactory(
-                    GifMuxer.Factory()
-                )
-                .setVideoMimeType(MimeTypes.VIDEO_H264)
-                .setRemoveAudio(true)
-                .build()
-        }
-    }
+    private val speed: Float,
+    private val fps: Float,
+    private val startPosition: Long,
+    private val endPosition: Long,
+
+    private val mediaItem: MediaItem,
+    private val mediaSourceFactory: MediaSource.Factory
+) {
+
+
+
 }

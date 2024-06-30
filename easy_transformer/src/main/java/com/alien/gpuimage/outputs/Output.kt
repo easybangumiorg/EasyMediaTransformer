@@ -20,6 +20,8 @@ interface Output {
 
     fun nextAvailableTextureIndex(): Int = 0
 
+    fun endInput() {}
+
     /**
      * 同步运行在 GL 线程
      */

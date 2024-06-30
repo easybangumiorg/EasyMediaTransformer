@@ -18,7 +18,7 @@ open class Filter(
 ) : Input(), Output {
 
     companion object {
-        private const val TAG = "Filter"
+        const val TAG = "Filter"
 
         private const val DEFAULT_VERTEX_SHADER =
             """
@@ -50,9 +50,9 @@ open class Filter(
     open var inputTextureCoordinateAttribute: Int = 0
     open var inputImageTextureUniform: Int = 0
 
-    private var inputRotation: RotationMode = RotationMode.NoRotation
-    private var inputFramebuffer: Framebuffer? = null
-    private var inputSize: Size? = null
+    protected var innerInputRotation: RotationMode = RotationMode.NoRotation
+    protected var innerInputFramebuffer: Framebuffer? = null
+    protected var innerInputSize: Size? = null
 
     protected val backgroundColor: BackgroundColor = BackgroundColor()
     private val uniformStateRestoration = HashMap<Int, Callback>()
@@ -85,22 +85,22 @@ open class Filter(
     }
 
     override fun setInputSize(inputSize: Size?, textureIndex: Int) {
-        this.inputSize = inputSize
+        this.innerInputSize = inputSize
     }
 
     override fun setInputFramebuffer(framebuffer: Framebuffer?, textureIndex: Int) {
-        inputFramebuffer = framebuffer
-        inputFramebuffer?.lock()
+        innerInputFramebuffer = framebuffer
+        innerInputFramebuffer?.lock()
     }
 
     override fun setInputRotation(rotation: RotationMode, textureIndex: Int) {
-        inputRotation = rotation
+        innerInputRotation = rotation
     }
 
     override fun newFrameReadyAtTime(time: Long, textureIndex: Int) {
         renderToTexture(
             DataBuffer.IMAGE_VERTICES,
-            DataBuffer.textureCoordinatesForRotation(inputRotation, false)
+            DataBuffer.textureCoordinatesForRotation(innerInputRotation, false)
         )
         informTargetsAboutNewFrameAtTime(time)
     }
@@ -125,15 +125,15 @@ open class Filter(
         return result
     }
 
-    open fun renderToTexture(vertices: FloatBuffer, textureCoordinates: FloatBuffer) {
+    open protected fun renderToTexture(vertices: FloatBuffer, textureCoordinates: FloatBuffer) {
         GLContext.setActiveShaderProgram(filterProgram)
 
         outputFramebuffer =
             GLContext.sharedFramebufferCache()
-                ?.fetchFramebuffer(this.inputSize, false, outputTextureOptions)
+                ?.fetchFramebuffer(this.innerInputSize, false, outputTextureOptions)
         Logger.d(
             TAG,
-            "filter in:${inputFramebuffer.toString()} out:${outputFramebuffer.toString()}"
+            "filter in:${innerInputFramebuffer.toString()} out:${outputFramebuffer.toString()}"
         )
         if (usingNextFrameForImageCapture) {
             outputFramebuffer?.lock()
@@ -150,7 +150,7 @@ open class Filter(
 
         // 激活纹理
         GLES20.glActiveTexture(GLES20.GL_TEXTURE2)
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, inputFramebuffer?.textureId ?: 0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, innerInputFramebuffer?.textureId ?: 0)
         GLES20.glUniform1i(inputImageTextureUniform, 2)
 
         // GL坐标
@@ -171,7 +171,7 @@ open class Filter(
         GLES20.glDisableVertexAttribArray(inputTextureCoordinateAttribute)
 
         // 输入释放fbo
-        inputFramebuffer?.unlock()
+        innerInputFramebuffer?.unlock()
     }
 
     open fun initializeAttributes() {
@@ -182,8 +182,8 @@ open class Filter(
     open fun informTargetsAboutNewFrameAtTime(time: Long) {
         targets.forEachIndexed { index, input ->
             val textureIndices = targetTextureIndices[index]
-            input.setInputRotation(inputRotation, textureIndices)
-            input.setInputSize(inputSize, textureIndices)
+            input.setInputRotation(innerInputRotation, textureIndices)
+            input.setInputSize(innerInputSize, textureIndices)
             input.setInputFramebuffer(outputFramebuffer, textureIndices)
         }
 
@@ -200,7 +200,7 @@ open class Filter(
 
     open fun rotatedSize(sizeToRotate: Size, textureIndex: Int): Size {
         val rotatedSize = Size(sizeToRotate.width, sizeToRotate.height)
-        if (DataBuffer.rotationSwapsWidthAndHeight(inputRotation)) {
+        if (DataBuffer.rotationSwapsWidthAndHeight(innerInputRotation)) {
             rotatedSize.width = sizeToRotate.height
             rotatedSize.height = sizeToRotate.width
         }
@@ -222,15 +222,15 @@ open class Filter(
     }
 
     fun getInputSize(): Size? {
-        return this.inputSize
+        return this.innerInputSize
     }
 
     fun getInputRotation(): RotationMode {
-        return this.inputRotation
+        return this.innerInputRotation
     }
 
     fun getInputFramebuffer(): Framebuffer? {
-        return this.inputFramebuffer
+        return this.innerInputFramebuffer
     }
 
     fun setFloat(floatValue: Float, uniform: Int, shaderProgram: GLProgram?) {
@@ -307,5 +307,9 @@ open class Filter(
         GLES20.glDisableVertexAttribArray(inputTextureCoordinateAttribute)
 
         return copyFramebuffer
+    }
+
+    override fun endInput() {
+        super<Input>.endInput()
     }
 }

@@ -3,6 +3,7 @@ package com.alien.gpuimage.outputs
 import android.graphics.Bitmap
 import android.opengl.GLES20
 import android.opengl.GLUtils
+import android.util.Log
 import com.alien.gpuimage.DataBuffer
 import com.alien.gpuimage.Framebuffer
 import com.alien.gpuimage.RotationMode
@@ -24,13 +25,13 @@ open class BitmapOut : Output {
     private var inputFramebuffer: Framebuffer? = null
     private var fboId: Int = 0
 
-    var callback: BitmapViewCallback? = null
+    var callback: BitmapOutCallback? = null
     private var inBuffer: ByteBuffer? = null
     var bitmap: Bitmap? = null
         private set
 
-    interface BitmapViewCallback {
-        fun onViewSwapToScreen(bitmap: Bitmap?, time: Long?)
+    interface BitmapOutCallback {
+        fun onBitmapAvailable(bitmap: Bitmap?, time: Long?)
     }
 
     override fun setInputSize(inputSize: Size?, textureIndex: Int) = Unit
@@ -43,6 +44,8 @@ open class BitmapOut : Output {
     override fun setInputRotation(inputRotation: RotationMode, textureIndex: Int) = Unit
 
     override fun newFrameReadyAtTime(time: Long, textureIndex: Int) {
+        val start = System.nanoTime()
+        Log.i(TAG, "newFrameReadyAtTime ${start}")
         inputFramebuffer?.let { it ->
             if (!it.onlyTexture) {
                 fboId = it.framebufferId
@@ -71,14 +74,15 @@ open class BitmapOut : Output {
             inputFramebuffer?.unlock()
         }
 
+        Log.i(TAG, "newFrameReadyAtTime end ${System.nanoTime() - start}")
         dispatchCallback(time, bitmap)
     }
 
     public open fun dispatchCallback(time: Long, bitmap: Bitmap?) {
-        callback?.onViewSwapToScreen(bitmap, time)
+        callback?.onBitmapAvailable(bitmap, time)
     }
 
-    fun release() {
+    open fun release() {
         if (inputFramebuffer?.onlyTexture == true) {
             if (fboId > 0) {
                 runAsynchronouslyGpu(Runnable {

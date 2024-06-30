@@ -3,6 +3,7 @@ package com.alien.gpuimage.sources.widget
 import android.graphics.SurfaceTexture
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
+import android.util.Log
 import com.alien.gpuimage.*
 import com.alien.gpuimage.sources.Input
 import com.alien.gpuimage.utils.Logger
@@ -143,6 +144,8 @@ class GLOesTexture : Input() {
     }
 
     private fun renderToTexture(vertices: FloatBuffer, textureCoordinates: FloatBuffer) {
+        val start = System.nanoTime()
+        Log.i(TAG, "renderToTexture Start ${start}")
         GLContext.useProcessingContext()
         GLContext.setActiveShaderProgram(oesProgram)
 
@@ -175,6 +178,7 @@ class GLOesTexture : Input() {
         // 关闭 属性
         GLES20.glDisableVertexAttribArray(positionAttribute)
         GLES20.glDisableVertexAttribArray(inputTextureCoordinateAttribute)
+        Log.i(TAG, "renderToTexture End ${System.nanoTime() - start}")
     }
 
     private fun informTargetsAboutNewFrameAtTime(time: Long) {

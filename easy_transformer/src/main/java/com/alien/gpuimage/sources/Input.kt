@@ -55,6 +55,12 @@ abstract class Input {
         }
     }
 
+    open fun endInput() {
+        targets.forEach {
+            it.endInput()
+        }
+    }
+
     fun removeTargets() {
         targets.clear()
         targetTextureIndices.clear()
